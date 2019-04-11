@@ -9,17 +9,13 @@ use rusoto_core::{
     signature::{SignedRequest, SignedRequestPayload},
     ByteStream,
 };
-use std::{
-    io,
-    sync::{Arc, Mutex},
-    time::Duration,
-};
+use std::{io, time::Duration};
 use tokio_buf::BufStream;
 use tower_http::{Body, BodyExt, HttpService};
 
 #[derive(Clone)]
 pub struct HttpClient<T> {
-    client: Arc<Mutex<T>>,
+    client: T,
 }
 
 pub struct RusotoBody {
@@ -32,14 +28,13 @@ struct BodyStream<T> {
 
 impl<T> HttpClient<T> {
     pub fn new(client: T) -> Self {
-        let client = Arc::new(Mutex::new(client));
         HttpClient { client }
     }
 }
 
 impl<T> DispatchSignedRequest for HttpClient<T>
 where
-    T: HttpService<RusotoBody>,
+    T: HttpService<RusotoBody> + Clone,
     T::Future: Send + 'static,
     T::ResponseBody: Send + 'static,
     <T::ResponseBody as Body>::Error: Into<io::Error>,
@@ -97,7 +92,7 @@ where
         *request.headers_mut() = headers;
 
         let request = {
-            let mut client = self.client.lock().unwrap();
+            let mut client = self.client.clone();
             client.call(request)
         };
 
