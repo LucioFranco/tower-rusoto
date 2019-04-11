@@ -1,0 +1,13 @@
+[package]
+name = "tower-rusoto"
+version = "0.1.0"
+authors = ["Lucio Franco <luciofranco14@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+bytes = "0.4"
+futures = "0.1"
+http = "0.1"
+rusoto_core = "0.37"
+tower-http = { git = "https://github.com/tower-rs/tower-http" }
+tokio-buf = "0.1"
